@@ -89,7 +89,7 @@ def eval_model(model, user_history, eval_seq, item_embeddings, test_batch_size, 
     item_embeddings = item_embeddings.to(local_rank)
     with torch.no_grad():
         eval_all_user = []
-        item_rank = torch.Tensor(np.arange(item_num) + 1).to(local_rank)
+        item_rank = torch.Tensor(np.arange(item_num - 1) + 1).to(local_rank)
         for data in eval_dl:
             user_ids, input_embs, log_mask, labels = data
             user_ids, input_embs, log_mask, labels = \

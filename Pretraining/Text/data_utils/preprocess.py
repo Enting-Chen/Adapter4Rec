@@ -31,11 +31,15 @@ def read_behaviors(behaviors_path, before_item_id_to_dic, before_item_name_to_id
     item_id = 1
     item_id_to_dic = {}
     item_id_before_to_now = {}
-    for before_item_id in range(1, before_item_num + 1):
+    for before_item_id in range(1, before_item_num):
         if before_item_counts[before_item_id] != 0:
             item_id_before_to_now[before_item_id] = item_id
             item_id_to_dic[item_id] = before_item_id_to_dic[before_item_id]
             item_id += 1
+
+    item_id_before_to_now[0] = 0
+    item_id_to_dic[0] = before_item_id_to_dic[0]
+
     item_num = len(item_id_before_to_now)
     Log_file.info(
         "##### items after clearing {}, {}, {} #####".format(item_num, len(item_id_before_to_now), len(item_id_to_dic)))
@@ -107,11 +111,16 @@ def read_news_bert(news_path, args, tokenizer):
             item_name_to_id[doc_name] = item_id
             item_id_to_dic[item_id] = [title, abstract, body]
             item_id += 1
+    
+    item_name_to_id['dummy'] = 0
+    title = tokenizer('', max_length=args.num_words_title, padding='max_length', truncation=True)
+    item_id_to_dic[0] = [title, [], []]
+
     return item_id_to_dic, item_name_to_id
 
 
 def get_doc_input_bert(item_id_to_content, args):
-    item_num = len(item_id_to_content) + 1
+    item_num = len(item_id_to_content)
 
     if 'title' in args.news_attributes:
         news_title = np.zeros((item_num, args.num_words_title), dtype='int32')
@@ -134,7 +143,7 @@ def get_doc_input_bert(item_id_to_content, args):
         news_body = None
         news_body_attmask = None
 
-    for item_id in range(1, item_num):
+    for item_id in range(0, item_num):
         title, abstract, body = item_id_to_content[item_id]
 
         if 'title' in args.news_attributes:

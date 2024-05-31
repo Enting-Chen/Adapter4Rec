@@ -35,9 +35,9 @@ class BuildTrainDataset(Dataset):
         sample_items.append(padding_seq)
         neg_items = []
         for i in range(tokens_Len):
-            sam_neg = random.randint(1, self.item_num)
+            sam_neg = random.randint(1, self.item_num - 1)
             while sam_neg in seq:
-                sam_neg = random.randint(1, self.item_num)
+                sam_neg = random.randint(1, self.item_num - 1)
             neg_items.append(sam_neg)
         neg_items = [0] * mask_len_head + neg_items + [0]
         sample_items.append(neg_items)
@@ -70,7 +70,7 @@ class BuildEvalDataset(Dataset):
         pad_tokens = [0] * mask_len + tokens
         log_mask = [0] * mask_len + [1] * len(tokens)
         input_embs = self.item_content[pad_tokens]
-        labels = np.zeros(self.item_num)
+        labels = np.zeros(self.item_num - 1)
         labels[target - 1] = 1.0
         return torch.LongTensor([user_id]), \
                input_embs, \

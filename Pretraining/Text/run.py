@@ -33,13 +33,13 @@ def test(args, use_modal, local_rank):
     if use_modal:
         if 'roberta' in args.bert_model_load:
             Log_file.info('load roberta model...')
-            bert_model_load = '../pretrained_models/roberta/' + args.bert_model_load
+            bert_model_load = args.bert_model_load
             tokenizer = RobertaTokenizer.from_pretrained(bert_model_load)
             config = RobertaConfig.from_pretrained(bert_model_load, output_hidden_states=True)
             bert_model = RobertaModel.from_pretrained(bert_model_load, config=config)
         else:
             Log_file.info('load bert model...')
-            bert_model_load = '../pretrained_models/bert/' + args.bert_model_load
+            bert_model_load = args.bert_model_load
             tokenizer = BertTokenizer.from_pretrained(bert_model_load)
             config = BertConfig.from_pretrained(bert_model_load, output_hidden_states=True)
             bert_model = BertModel.from_pretrained(bert_model_load, config=config)
@@ -123,21 +123,21 @@ def train(args, use_modal, local_rank):
     if use_modal:
         if 'roberta' in args.bert_model_load:
             Log_file.info('load roberta model...')
-            bert_model_load = '../pretrained_models/roberta/' + args.bert_model_load
+            bert_model_load = args.bert_model_load
             tokenizer = RobertaTokenizer.from_pretrained(bert_model_load)
             config = RobertaConfig.from_pretrained(bert_model_load, output_hidden_states=True)
             bert_model = RobertaModel.from_pretrained(bert_model_load, config=config)
         elif 'opt' in args.bert_model_load:
             Log_file.info('load opt model...')
-            bert_model_load = '../pretrained_models/opt/' + args.bert_model_load
+            bert_model_load = args.bert_model_load
             tokenizer = GPT2Tokenizer.from_pretrained(bert_model_load)
             config = OPTConfig.from_pretrained(bert_model_load, output_hidden_states=True)
             bert_model = OPTModel.from_pretrained(bert_model_load, config=config)
             pooler_para = []
         else:
             Log_file.info('load bert model...')
-            bert_model_load = '../pretrained_models/bert/' + args.bert_model_load
-            tokenizer = BertTokenizer.from_pretrained(bert_model_load, local_files_only=True)
+            bert_model_load = args.bert_model_load
+            tokenizer = BertTokenizer.from_pretrained(bert_model_load)
             config = BertConfig.from_pretrained(bert_model_load, output_hidden_states=True)
             bert_model = BertModel.from_pretrained(bert_model_load, config=config)
 
@@ -192,7 +192,7 @@ def train(args, use_modal, local_rank):
         item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test = \
             read_behaviors(os.path.join(args.root_data_dir, args.dataset, args.behaviors), before_item_id_to_dic,
                            before_item_name_to_id, args.max_seq_len, args.min_seq_len, Log_file)
-        item_content = np.arange(item_num + 1)
+        item_content = np.arange(item_num)
         bert_model = None
 
     Log_file.info('build dataset...')
@@ -298,6 +298,7 @@ def train(args, use_modal, local_rank):
 
     steps_for_log, steps_for_eval = para_and_log(model, len(users_train), args.batch_size, Log_file,
                                                  logging_num=args.logging_num, testing_num=args.testing_num)
+    steps_for_log = 1
     scaler = torch.cuda.amp.GradScaler()
     Log_screen.info('{} train start'.format(args.label_screen))
     for ep in range(args.epoch):
@@ -308,6 +309,7 @@ def train(args, use_modal, local_rank):
         loss, batch_index, need_break = 0.0, 1, False
         train_dl.sampler.set_epoch(now_epoch)
         model.train()
+        print(len(train_dl), len(train_dl.dataset))
         for data in train_dl:
             sample_items, log_mask = data
             sample_items, log_mask = sample_items.to(local_rank), log_mask.to(local_rank)
@@ -398,7 +400,7 @@ if __name__ == "__main__":
     local_rank = args.local_rank
     torch.cuda.set_device(local_rank)
     dist.init_process_group(backend='nccl', init_method="env://")
-    setup_seed(123456)
+    setup_seed(12345)
 
     if 'modal' in args.item_tower:
         is_use_modal = True

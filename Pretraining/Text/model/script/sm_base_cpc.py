@@ -2,13 +2,13 @@ import os
 
 root_data_dir = '../'
 
-dataset = '../../Dataset/MIND'
-behaviors = 'mind_large_users_base.tsv'
-news = 'mind_large_news_base.tsv'
+dataset = '../../Dataset/douban'
+behaviors = 'douban_books_users.txt'
+news = 'douban_books_items.txt'
 logging_num = 4
 testing_num = 1
 
-bert_model_load = 'bert_base_uncased'
+bert_model_load = 'bert-base-multilingual-cased'
 freeze_paras_before = 0
 news_attributes = 'title'
 
@@ -20,7 +20,7 @@ load_ckpt_name = 'None'
 
 l2_weight_list = [0]
 drop_rate_list = [0.1]
-batch_size_list = [32]
+batch_size_list = [16]
 lr_list = [5e-6]
 embedding_dim_list = [64]
 fine_tune_lr_list = [5e-5]
@@ -35,8 +35,7 @@ for l2_weight in l2_weight_list:
                         label_screen = '{}_bs{}_ed{}_lr{}_dp{}_L2{}_Flr{}'.format(
                             item_tower, batch_size, embedding_dim, lr,
                             drop_rate, l2_weight, fine_tune_lr)
-                        run_py = "CUDA_VISIBLE_DEVICES='0,1' \
-                                 python  -m torch.distributed.launch --nproc_per_node 2 --master_port 1238\
+                        run_py = "torchrun --nproc_per_node 1 --master_port 1238\
                                  ../run.py --root_data_dir {}  --dataset {} --behaviors {} --news {}\
                                  --mode {} --item_tower {} --load_ckpt_name {} --label_screen {} --logging_num {} --testing_num {}\
                                  --l2_weight {} --drop_rate {} --batch_size {} --lr {} --embedding_dim {} \
