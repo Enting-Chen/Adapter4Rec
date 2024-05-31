@@ -1,5 +1,5 @@
 
-# Adapter4Rec（WSDM2024）
+# Adapter4Rec
 
 forked from https://github.com/westlake-repl/Adapter4Rec/
 
