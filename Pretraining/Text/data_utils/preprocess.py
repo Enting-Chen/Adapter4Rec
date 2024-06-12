@@ -51,12 +51,18 @@ def read_behaviors(behaviors_path, before_item_id_to_dic, before_item_name_to_id
     users_history_for_test = {}
     user_id = 0
     count_interaction = 0
+    popularity = [0] * item_num
+
     for user_name, item_seqs in user_seq_dic.items():
         user_seq = [item_id_before_to_now[i] for i in item_seqs]
         train = user_seq[:-2]
         count_interaction += len(user_seq) + 2
         valid = user_seq[-(max_seq_len + 2):-1]
         test = user_seq[-(max_seq_len + 1):]
+
+        for item_id in test[:-1]:
+            popularity[item_id] += 1
+
         users_train[user_id] = train
         users_valid[user_id] = valid
         users_test[user_id] = test
@@ -64,10 +70,13 @@ def read_behaviors(behaviors_path, before_item_id_to_dic, before_item_name_to_id
         users_history_for_valid[user_id] = torch.LongTensor(np.array(train))
         users_history_for_test[user_id] = torch.LongTensor(np.array(user_seq[:-1]))
         user_id += 1
+    
+    popularity = torch.FloatTensor(popularity).view(1, -1)
+
     Log_file.info("##### user seqs after clearing {}, {}, {}, {}, {}#####".
                   format(seq_num, len(user_seq_dic), len(users_train), len(users_valid), len(users_test)))
     Log_file.info("##### interation number after clearing {}".format(count_interaction))
-    return item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test
+    return item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test, popularity
 
 
 def read_news(news_path):
@@ -81,6 +90,8 @@ def read_news(news_path):
             item_name_to_id[doc_name] = item_id
             item_id_to_dic[item_id] = doc_name
             item_id += 1
+    item_name_to_id[doc_name] = 0
+    item_id_to_dic[0] = 0
     return item_id_to_dic, item_name_to_id
 
 

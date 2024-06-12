@@ -20,12 +20,12 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 def run_eval_test(model, item_content, user_history, users_eval, batch_size, item_num, use_modal,
-                  mode, local_rank):
+                  mode, local_rank, popularity=None):
     eval_start_time = time.time()
     Log_file.info('Validating...')
     item_embeddings = get_item_embeddings(model, item_content, batch_size, args, use_modal, local_rank)
     eval_model(model, user_history, users_eval, item_embeddings, batch_size, args,
-               item_num, Log_file, mode, local_rank)
+               item_num, Log_file, mode, local_rank, popularity)
     report_time_eval(eval_start_time, Log_file)
 
 
@@ -68,7 +68,7 @@ def test(args, use_modal, local_rank):
             os.path.join(args.root_data_dir, args.dataset, args.news), args, tokenizer)
 
         Log_file.info('read behaviors...')
-        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test = \
+        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test, _ = \
             read_behaviors(os.path.join(args.root_data_dir, args.dataset, args.behaviors), before_item_id_to_dic,
                            before_item_name_to_id,
                            args.max_seq_len, args.min_seq_len, Log_file)
@@ -89,7 +89,7 @@ def test(args, use_modal, local_rank):
             os.path.join(args.root_data_dir, args.dataset, args.news))
 
         Log_file.info('read behaviors...')
-        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test = \
+        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test, popularity = \
             read_behaviors(os.path.join(args.root_data_dir, args.dataset, args.behaviors), before_item_id_to_dic,
                            before_item_name_to_id, args.max_seq_len, args.min_seq_len, Log_file)
         item_content = np.arange(item_num + 1)
@@ -116,8 +116,7 @@ def test(args, use_modal, local_rank):
     model = DDP(model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=False)
 
     run_eval_test(model, item_content, users_history_for_test, users_test, 512, item_num, use_modal,
-                  args.mode, local_rank)
-
+                args.mode, local_rank, popularity)
 
 def train(args, use_modal, local_rank):
     if use_modal:
@@ -168,7 +167,7 @@ def train(args, use_modal, local_rank):
             os.path.join(args.root_data_dir, args.dataset, args.news), args, tokenizer)
 
         Log_file.info('read behaviors...')
-        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test = \
+        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test, _ = \
             read_behaviors(os.path.join(args.root_data_dir, args.dataset, args.behaviors), before_item_id_to_dic,
                            before_item_name_to_id,
                            args.max_seq_len, args.min_seq_len, Log_file)
@@ -189,7 +188,7 @@ def train(args, use_modal, local_rank):
             os.path.join(args.root_data_dir, args.dataset, args.news))
 
         Log_file.info('read behaviors...')
-        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test = \
+        item_num, item_id_to_dic, users_train, users_valid, users_test, users_history_for_valid, users_history_for_test, _ = \
             read_behaviors(os.path.join(args.root_data_dir, args.dataset, args.behaviors), before_item_id_to_dic,
                            before_item_name_to_id, args.max_seq_len, args.min_seq_len, Log_file)
         item_content = np.arange(item_num)

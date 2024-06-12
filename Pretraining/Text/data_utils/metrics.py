@@ -77,7 +77,7 @@ def get_item_embeddings(model, item_content, test_batch_size, args, use_modal, l
 
 
 def eval_model(model, user_history, eval_seq, item_embeddings, test_batch_size, args, item_num, Log_file, v_or_t,
-               local_rank):
+               local_rank, popularity):
     eval_dataset = BuildEvalDataset(u2seq=eval_seq, item_content=item_embeddings,
                                     max_seq_len=args.max_seq_len, item_num=item_num)
     test_sampler = SequentialDistributedSampler(eval_dataset, batch_size=test_batch_size)
@@ -95,8 +95,11 @@ def eval_model(model, user_history, eval_seq, item_embeddings, test_batch_size, 
             user_ids, input_embs, log_mask, labels = \
                 user_ids.to(local_rank), input_embs.to(local_rank), \
                 log_mask.to(local_rank), labels.to(local_rank).detach()
-            prec_emb = model.module.user_encoder(input_embs, log_mask, local_rank)[:, -1].detach()
-            scores = torch.matmul(prec_emb, item_embeddings.t()).squeeze(dim=-1).detach()
+            if 'pop' in args.mode:
+                scores = popularity.repeat(test_batch_size, 1).to(local_rank)
+            else:
+                prec_emb = model.module.user_encoder(input_embs, log_mask, local_rank)[:, -1].detach()
+                scores = torch.matmul(prec_emb, item_embeddings.t()).squeeze(dim=-1).detach()
             for user_id, label, score in zip(user_ids, labels, scores):
                 user_id = user_id[0].item()
                 history = user_history[user_id].to(local_rank)

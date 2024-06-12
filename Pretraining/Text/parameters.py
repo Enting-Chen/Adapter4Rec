@@ -5,7 +5,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # ============== data_dir ==============
-    parser.add_argument("--mode", type=str, default="train", choices=['train', 'test', 'load'])
+    parser.add_argument("--mode", type=str, default="train", choices=['train', 'test', 'load', 'test_pop'])
     parser.add_argument("--item_tower", type=str, default="modal", choices=['modal', 'id'])
     parser.add_argument("--root_data_dir", type=str, default="../", )
     parser.add_argument("--dataset", type=str, default='MIND-small')
