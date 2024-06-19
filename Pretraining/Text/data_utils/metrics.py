@@ -77,7 +77,7 @@ def get_item_embeddings(model, item_content, test_batch_size, args, use_modal, l
 
 
 def eval_model(model, user_history, eval_seq, item_embeddings, test_batch_size, args, item_num, Log_file, v_or_t,
-               local_rank, popularity):
+               local_rank, popularity=None):
     eval_dataset = BuildEvalDataset(u2seq=eval_seq, item_content=item_embeddings,
                                     max_seq_len=args.max_seq_len, item_num=item_num)
     test_sampler = SequentialDistributedSampler(eval_dataset, batch_size=test_batch_size)

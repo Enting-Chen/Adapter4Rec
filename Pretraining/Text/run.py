@@ -335,6 +335,8 @@ def train(args, use_modal, local_rank):
 
         if not need_break:
             Log_file.info('')
+            run_eval_test(model, item_content, users_history_for_test, users_test, 512, item_num, use_modal,
+                        'test', local_rank)
             max_eval_value, max_epoch, early_stop_epoch, early_stop_count, need_break = \
                 run_eval(now_epoch, max_epoch, early_stop_epoch, max_eval_value, early_stop_count,
                          model, item_content, users_history_for_valid, users_valid, 512, item_num, use_modal,
