@@ -4,7 +4,7 @@ root_data_dir = '../'
 
 dataset = '../../Dataset/douban'
 behaviors = 'douban_books_users.txt'
-news = 'douban_books_items.txt'
+news = 'douban_books_items1.txt'
 logging_num = 4
 testing_num = 1
 
