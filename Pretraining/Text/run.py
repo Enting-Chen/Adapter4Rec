@@ -328,9 +328,9 @@ def train(args, use_modal, local_rank):
                 need_break = True
                 break
 
-            if batch_index % steps_for_log == 0:
-                Log_file.info('cnt: {}, Ed: {}, batch loss: {:.5f}, sum loss: {:.5f}'.format(
-                    batch_index, batch_index * args.batch_size, loss.data / batch_index, loss.data))
+            # if batch_index % steps_for_log == 0:
+            #     Log_file.info('cnt: {}, Ed: {}, batch loss: {:.5f}, sum loss: {:.5f}'.format(
+            #         batch_index, batch_index * args.batch_size, loss.data / batch_index, loss.data))
             batch_index += 1
 
         if not need_break:
@@ -342,18 +342,18 @@ def train(args, use_modal, local_rank):
                          model, item_content, users_history_for_valid, users_valid, 512, item_num, use_modal,
                          args.mode, is_early_stop, local_rank)
             model.train()
-            if use_modal and dist.get_rank() == 0:
-                # save_model(now_epoch, model, model_dir, Log_file)
-                save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(), torch.cuda.get_rng_state(),
-                           Log_file)  # new
+            # if use_modal and dist.get_rank() == 0:
+            #     # save_model(now_epoch, model, model_dir, Log_file)
+            #     save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(), torch.cuda.get_rng_state(),
+            #                Log_file)  # new
         Log_file.info('')
         next_set_start_time = report_time_train(batch_index, now_epoch, loss, next_set_start_time, start_time, Log_file)
         Log_screen.info('{} training: epoch {}/{}'.format(args.label_screen, now_epoch, args.epoch))
         if need_break:
             break
-        if dist.get_rank() == 0:
-            save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(), torch.cuda.get_rng_state(),
-                       Log_file)  # new
+    if dist.get_rank() == 0:
+        save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(), torch.cuda.get_rng_state(),
+                   Log_file)  # new
     Log_file.info('\n')
     Log_file.info('%' * 90)
     Log_file.info(' max eval Hit10 {:0.5f}  in epoch {}'.format(max_eval_value * 100, max_epoch))
