@@ -33,12 +33,12 @@ def parse_args():
     parser.add_argument("--use_cls", type=bool, default=True)
 
     # ============== switch and logging setting ==============
-    parser.add_argument("--num_workers", type=int, default=12)
+    parser.add_argument("--num_workers", type=int, default=1)
     parser.add_argument("--load_ckpt_name", type=str, default='None')
     parser.add_argument("--label_screen", type=str, default='None')
     parser.add_argument("--logging_num", type=int, default=8)
     parser.add_argument("--testing_num", type=int, default=1)
-    parser.add_argument("--local_rank", default=-1, type=int)
+    parser.add_argument("--local_rank", default=0, type=int)
 
     # ============== news information==============
     parser.add_argument("--num_words_title", type=int, default=30)

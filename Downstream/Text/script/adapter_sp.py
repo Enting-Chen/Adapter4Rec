@@ -2,9 +2,9 @@ import os
 
 root_data_dir = '../'
 
-dataset = 'dataset/Adressa'
-behaviors = '../../Dataset/Adressa_users_base_2w.tsv'
-news = 'Adressa_news_base.tsv'
+dataset = '../../Dataset/douban'
+behaviors = 'douban_books_users.txt'
+news = 'douban_books_items.txt'
 # for the pretrained model
 pretrained_model_dir = '../pretrained_models'
 pretrained_model_name = 'epoch-53'
@@ -12,7 +12,7 @@ pretrained_model_name = 'epoch-53'
 logging_num = 4
 testing_num = 1
 
-bert_model_load = 'bert_base_uncased'
+bert_model_load = 'bert-base-multilingual-cased'
 freeze_paras_before = 0
 news_attributes = 'title'
 
@@ -55,8 +55,7 @@ for adapter_sasrec_lr in adapter_sasrec_lr_list:
                                             item_tower, batch_size, embedding_dim, lr,
                                             drop_rate, l2_weight, fine_tune_lr, adapter_bert_lr, adapter_bert_lr,
                                             adapter_sasrec_lr)
-                                        run_py = "CUDA_VISIBLE_DEVICES='0' \
-                                                 python  -m torch.distributed.launch --nproc_per_node 1 --master_port 1277\
+                                        run_py = "torchrun --nproc_per_node 1 --master_port 1277\
                                                  ../run.py --root_data_dir {}  --dataset {} --behaviors {} --news {}\
                                                  --mode {} --item_tower {} --load_ckpt_name {} --label_screen {} --logging_num {} --testing_num {}\
                                                  --l2_weight {} --drop_rate {} --batch_size {} --lr {} --embedding_dim {} \

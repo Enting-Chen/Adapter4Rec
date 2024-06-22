@@ -86,13 +86,13 @@ class CompacterModel(nn.Module):
 def test(args, use_modal, local_rank):
     if 'roberta' in args.bert_model_load:
         Log_file.info('load roberta model...')
-        bert_model_load = '../pretrained_models/roberta/' + args.bert_model_load
+        bert_model_load = args.bert_model_load
         tokenizer = RobertaTokenizer.from_pretrained(bert_model_load)
         config = RobertaConfig.from_pretrained(bert_model_load, output_hidden_states=True)
         bert_model = RobertaModel.from_pretrained(bert_model_load, config=config)
     else:
         Log_file.info('load bert model...')
-        bert_model_load = '../f/bert/' + args.bert_model_load
+        bert_model_load = args.bert_model_load
         tokenizer = BertTokenizer.from_pretrained(bert_model_load)
         config = BertConfig.from_pretrained(bert_model_load, output_hidden_states=True)
         bert_model = BertModel.from_pretrained(bert_model_load, config=config)
@@ -288,13 +288,13 @@ def run_eval_test(model, item_content, user_history, users_eval, batch_size, ite
 def train(args, use_modal, local_rank):
     if 'roberta' in args.bert_model_load:
         Log_file.info('load roberta model...')
-        bert_model_load = '../pretrained_models/roberta/' + args.bert_model_load
+        bert_model_load = args.bert_model_load
         tokenizer = RobertaTokenizer.from_pretrained(bert_model_load)
         config = RobertaConfig.from_pretrained(bert_model_load, output_hidden_states=True)
         bert_model = RobertaModel.from_pretrained(bert_model_load, config=config)
     else:
         Log_file.info('load bert model...')
-        bert_model_load = '../pretrained_models/bert/' + args.bert_model_load
+        bert_model_load = args.bert_model_load
         tokenizer = BertTokenizer.from_pretrained(bert_model_load)
         config = BertConfig.from_pretrained(bert_model_load, output_hidden_states=True)
         bert_model = BertModel.from_pretrained(bert_model_load, config=config)
