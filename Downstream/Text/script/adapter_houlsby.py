@@ -2,9 +2,9 @@ import os
 
 root_data_dir = '../'
 
-dataset = '../../Dataset/douban'
-behaviors = 'douban_books_users.txt'
-news = 'douban_books_items.txt'
+dataset = '../../Dataset/movielens'
+behaviors = 'movielens_users.txt'
+news = 'movielens_items.txt'
 # for the pretrained model
 pretrained_model_dir = '../pretrained_models'
 pretrained_model_name = 'epoch-53'
@@ -12,8 +12,8 @@ pretrained_model_name = 'epoch-53'
 logging_num = 4
 testing_num = 1
 
-bert_model_load = 'bert-base-multilingual-cased'
-freeze_paras_before = 0
+bert_model_load = 'bert-base-uncased'
+freeze_paras_before = 198
 news_attributes = 'title'
 
 mode = 'train'

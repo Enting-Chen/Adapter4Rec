@@ -2,13 +2,13 @@ import os
 
 root_data_dir = '../'
 
-dataset = '../../Dataset/douban'
-behaviors = 'douban_books_users.txt'
-news = 'douban_books_items.txt'
+dataset = '../../Dataset/movielens'
+behaviors = 'movielens_users.txt'
+news = 'movielens_items.txt'
 logging_num = 4
 testing_num = 1
 
-bert_model_load = 'bert-base-multilingual-cased'
+bert_model_load = 'bert-base-uncased'
 freeze_paras_before = 0
 news_attributes = 'title'
 
@@ -20,7 +20,7 @@ load_ckpt_name = 'None'
 
 l2_weight_list = [0]
 drop_rate_list = [0.1]
-batch_size_list = [16]
+batch_size_list = [32]
 lr_list = [1e-4]
 embedding_dim_list = [64]
 fine_tune_lr_list = [5e-5]

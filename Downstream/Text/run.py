@@ -364,21 +364,21 @@ def train(args, use_modal, local_rank):
     model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model).to(local_rank)
     # TODO set finetune and logs_adapter
     # make all model gradient becomes false
-    if 'all' in args.fine_tune_to:
-        pass
-    elif 'None' in args.fine_tune_to:
-        for index, (name, param) in enumerate(model.named_parameters()):
-            param.requires_grad = False
-    # TODO the bert fine tune
-    else:
-        assert 1 == 0, "fine_tune_to should be defined properly"
+    # if 'all' in args.fine_tune_to:
+    #     pass
+    # elif 'None' in args.fine_tune_to:
+    #     for index, (name, param) in enumerate(model.named_parameters()):
+    #         param.requires_grad = False
+    # # TODO the bert fine tune
+    # else:
+    #     assert 1 == 0, "fine_tune_to should be defined properly"
 
     if 'None' not in args.pretrained_model_name:
         Log_file.info('loading the pretrained_models model')
         ckpt_path = get_checkpoint(args.pretrained_model_dir, f"{args.pretrained_model_name}.pt")
         checkpoint = torch.load(ckpt_path, map_location=torch.device('cpu'))
         Log_file.info('load checkpoint...')
-        model.load_state_dict(checkpoint['model_state_dict'])
+        model.load_state_dict(checkpoint['model_state_dict'], strict=False)
         Log_file.info(f"Model loaded from {ckpt_path}")
 
     # adding adapters after this line
@@ -420,12 +420,12 @@ def train(args, use_modal, local_rank):
                 layer_module.attention.self.value = lora.Linear(args.word_embedding_dim, args.word_embedding_dim,
                                                                 r=args.bert_adapter_down_size).to(local_rank)
             # adding adapters to the SASRec model
-            for index, transformer_block in enumerate(
-                    model.user_encoder.transformer_encoder.transformer_blocks):
-                model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_Q = lora.Linear(
-                    args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
-                model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_V = lora.Linear(
-                    args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
+            # for index, transformer_block in enumerate(
+            #         model.user_encoder.transformer_encoder.transformer_blocks):
+            #     model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_Q = lora.Linear(
+            #         args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
+            #     model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_V = lora.Linear(
+            #         args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
         elif "prompt" in args.adapter_type:
             Log_file.info('Setting Soft prompt...')
             s_wte = SoftEmbedding(bert_model.get_input_embeddings(),
@@ -459,10 +459,10 @@ def train(args, use_modal, local_rank):
                         local_rank)
                     layer_module.output = add_adapter_to_bert(layer_module.output, args).to(local_rank)
                 # adding adapters to the SASRec model
-                for index, transformer_block in enumerate(
-                        model.user_encoder.transformer_encoder.transformer_blocks):
-                    model.user_encoder.transformer_encoder.transformer_blocks[index] = add_adapter_to_sasrec(
-                        transformer_block, args).to(local_rank)
+                # for index, transformer_block in enumerate(
+                #         model.user_encoder.transformer_encoder.transformer_blocks):
+                #     model.user_encoder.transformer_encoder.transformer_blocks[index] = add_adapter_to_sasrec(
+                #         transformer_block, args).to(local_rank)
             else:
                 # adding adapters to the bert model
                 for index, layer_module in enumerate(
@@ -472,11 +472,11 @@ def train(args, use_modal, local_rank):
                         local_rank)
                     layer_module.output = add_parallel_adapter_to_bert(layer_module.output, args).to(local_rank)
                 # adding adapters to the SASRec model
-                for index, transformer_block in enumerate(
-                        model.user_encoder.transformer_encoder.transformer_blocks):
-                    model.user_encoder.transformer_encoder.transformer_blocks[
-                        index] = add_parallel_adapter_to_sasrec(
-                        transformer_block, args).to(local_rank)
+                # for index, transformer_block in enumerate(
+                #         model.user_encoder.transformer_encoder.transformer_blocks):
+                #     model.user_encoder.transformer_encoder.transformer_blocks[
+                #         index] = add_parallel_adapter_to_sasrec(
+                #         transformer_block, args).to(local_rank)
 
     if 'None' not in args.load_ckpt_name:
         Log_file.info('load ckpt if not None...')
@@ -574,7 +574,7 @@ def train(args, use_modal, local_rank):
     steps_for_log, steps_for_eval = para_and_log(model, len(users_train), args.batch_size, Log_file,
                                                  logging_num=args.logging_num, testing_num=args.testing_num)
     Log_screen.info('{} train start'.format(args.label_screen))
-    max_hit10 = 0
+    # max_hit10 = 0
     for ep in range(args.epoch):
         now_epoch = start_epoch + ep + 1
         Log_file.info('\n')
@@ -610,24 +610,24 @@ def train(args, use_modal, local_rank):
 
         if not need_break:
             Log_file.info('')
+            run_eval_test(model, item_content, users_history_for_test, users_test, 512, item_num, use_modal,
+                          'test', local_rank)
             max_eval_value, max_epoch, early_stop_epoch, early_stop_count, need_break = \
                 run_eval(now_epoch, max_epoch, early_stop_epoch, max_eval_value, early_stop_count,
                          model, item_content, users_history_for_valid, users_valid, 512, item_num, use_modal,
                          args.mode, is_early_stop, local_rank)
             model.train()
-            if max_eval_value > max_hit10 or max_hit10 == 0:
-                max_hit10 = max_eval_value
-                run_eval_test(model, item_content, users_history_for_test, users_test, 512, item_num, use_modal,
-                              args.mode, local_rank)
-                if use_modal and dist.get_rank() == 0:
-                    save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(),
-                               torch.cuda.get_rng_state(), Log_file)
-            elif ep % 10 == 0:
-                run_eval_test(model, item_content, users_history_for_test, users_test, 512, item_num, use_modal,
-                              args.mode, local_rank)
-                if use_modal and dist.get_rank() == 0:
-                    save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(),
-                               torch.cuda.get_rng_state(), Log_file)
+            # if max_eval_value > max_hit10 or max_hit10 == 0:
+            # max_hit10 = max_eval_value
+            # if use_modal and dist.get_rank() == 0:
+            #     save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(),
+            #                torch.cuda.get_rng_state(), Log_file)
+            # elif ep % 10 == 0:
+            #     run_eval_test(model, item_content, users_history_for_test, users_test, 512, item_num, use_modal,
+            #                   args.mode, local_rank)
+            # if use_modal and dist.get_rank() == 0:
+            #     save_model(now_epoch, model, model_dir, optimizer, torch.get_rng_state(),
+            #                torch.cuda.get_rng_state(), Log_file)
 
         # judging whether to put this value in to the lis
 
@@ -683,7 +683,7 @@ if __name__ == "__main__":
     local_rank = args.local_rank
     torch.cuda.set_device(local_rank)
     dist.init_process_group(backend='nccl', init_method="env://")
-    setup_seed(123456)
+    setup_seed(12345)
     is_use_modal = True
     model_load = args.bert_model_load
     dir_label = f'{args.arch}_{model_load}_freeze_{args.freeze_paras_before}' + f"_{args.pretrained_model_name}" + f"_add_adapter_to_{args.adding_adapter_to}" + f"_adapter_bert_lr_{args.adapter_bert_lr}" + f"_adapter_sasrec_lr_{args.adapter_sasrec_lr}" + f"_adapter_down_size_{args.adapter_down_size}" + f"_bert_adapter_down_size_{args.bert_adapter_down_size}__serial_{args.is_serial}_layernorm_{args.finetune_layernorm}_{args.adapter_type}_adam"
