@@ -33,7 +33,7 @@ adapter_sasrec_lr_list = [1e-3]
 # ['bert','sasrec_all', 'sasrec_first', 'sasrec_last', 'all','None']
 adding_adapter_to_list = ['all']
 # None or all
-fine_tune_to_list = ['all']
+fine_tune_to_list = ['None']
 # None or TRUE
 finetune_layernorm = "None"
 # None or True

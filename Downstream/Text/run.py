@@ -193,12 +193,12 @@ def test(args, use_modal, local_rank):
                 layer_module.attention.self.value = lora.Linear(args.word_embedding_dim, args.word_embedding_dim,
                                                                 r=args.bert_adapter_down_size).to(local_rank)
             # adding adapters to the SASRec model
-            for index, transformer_block in enumerate(
-                    model.user_encoder.transformer_encoder.transformer_blocks):
-                model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_Q = lora.Linear(
-                    args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
-                model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_V = lora.Linear(
-                    args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
+            # for index, transformer_block in enumerate(
+            #         model.user_encoder.transformer_encoder.transformer_blocks):
+            #     model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_Q = lora.Linear(
+            #         args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
+            #     model.user_encoder.transformer_encoder.transformer_blocks[index].multi_head_attention.w_V = lora.Linear(
+            #         args.embedding_dim, args.embedding_dim, r=args.adapter_down_size).to(local_rank)
         elif "prompt" in args.adapter_type:
             Log_file.info('Setting Soft prompt...')
             s_wte = SoftEmbedding(bert_model.get_input_embeddings(),
@@ -232,10 +232,10 @@ def test(args, use_modal, local_rank):
                         local_rank)
                     layer_module.output = add_adapter_to_bert(layer_module.output, args).to(local_rank)
                 # adding adapters to the SASRec model
-                for index, transformer_block in enumerate(
-                        model.user_encoder.transformer_encoder.transformer_blocks):
-                    model.user_encoder.transformer_encoder.transformer_blocks[index] = add_adapter_to_sasrec(
-                        transformer_block, args).to(local_rank)
+                # for index, transformer_block in enumerate(
+                #         model.user_encoder.transformer_encoder.transformer_blocks):
+                #     model.user_encoder.transformer_encoder.transformer_blocks[index] = add_adapter_to_sasrec(
+                #         transformer_block, args).to(local_rank)
             else:
                 # adding adapters to the bert model
                 for index, layer_module in enumerate(
@@ -245,11 +245,11 @@ def test(args, use_modal, local_rank):
                         local_rank)
                     layer_module.output = add_parallel_adapter_to_bert(layer_module.output, args).to(local_rank)
                 # adding adapters to the SASRec model
-                for index, transformer_block in enumerate(
-                        model.user_encoder.transformer_encoder.transformer_blocks):
-                    model.user_encoder.transformer_encoder.transformer_blocks[
-                        index] = add_parallel_adapter_to_sasrec(
-                        transformer_block, args).to(local_rank)
+                # for index, transformer_block in enumerate(
+                #         model.user_encoder.transformer_encoder.transformer_blocks):
+                #     model.user_encoder.transformer_encoder.transformer_blocks[
+                #         index] = add_parallel_adapter_to_sasrec(
+                #         transformer_block, args).to(local_rank)
 
         Log_file.info(model)
         Log_file.info('load ckpt if not None...')
@@ -364,14 +364,14 @@ def train(args, use_modal, local_rank):
     model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model).to(local_rank)
     # TODO set finetune and logs_adapter
     # make all model gradient becomes false
-    # if 'all' in args.fine_tune_to:
-    #     pass
-    # elif 'None' in args.fine_tune_to:
-    #     for index, (name, param) in enumerate(model.named_parameters()):
-    #         param.requires_grad = False
-    # # TODO the bert fine tune
-    # else:
-    #     assert 1 == 0, "fine_tune_to should be defined properly"
+    if 'all' in args.fine_tune_to:
+        pass
+    elif 'None' in args.fine_tune_to:
+        for index, (name, param) in enumerate(model.named_parameters()):
+            param.requires_grad = False
+    # TODO the bert fine tune
+    else:
+        assert 1 == 0, "fine_tune_to should be defined properly"
 
     if 'None' not in args.pretrained_model_name:
         Log_file.info('loading the pretrained_models model')

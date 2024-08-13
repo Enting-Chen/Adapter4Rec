@@ -4,7 +4,7 @@ root_data_dir = '../'
 
 dataset = '../../Dataset/movielens'
 behaviors = 'movielens_users.txt'
-news = 'movielens_items.txt'
+news = 'movielens_tag_unique_items.txt'
 # for the pretrained model
 pretrained_model_dir = '../pretrained_models'
 pretrained_model_name = 'epoch-53'
@@ -19,7 +19,7 @@ news_attributes = 'title'
 mode = 'train'
 item_tower = 'modal'
 
-epoch = 100
+epoch = 200
 load_ckpt_name = 'None'
 
 l2_weight_list = [0]
@@ -33,7 +33,7 @@ adapter_sasrec_lr_list = [1.5e-4]
 # ['bert','sasrec_all', 'sasrec_first', 'sasrec_last', 'all','None']
 adding_adapter_to_list = ['all']
 # None or all
-fine_tune_to_list = ['None']
+fine_tune_to_list = ['all']
 # None or TRUE
 finetune_layernorm = "None"
 # None or True
@@ -41,6 +41,7 @@ is_serial = "True"
 adapter_down_size = 16
 bert_adapter_down_size = 64
 arch = 'sasrec'
+num_words_title = 20 
 for adapter_sasrec_lr in adapter_sasrec_lr_list:
     for adapter_bert_lr in adapter_bert_lr_list:
         for adding_adapter_to in adding_adapter_to_list:
@@ -61,7 +62,7 @@ for adapter_sasrec_lr in adapter_sasrec_lr_list:
                                                  --l2_weight {} --drop_rate {} --batch_size {} --lr {} --embedding_dim {} \
                                                  --news_attributes {} --bert_model_load {}  --epoch {} --freeze_paras_before {}  --fine_tune_lr {}\
                                                  --adapter_sasrec_lr {} --adapter_bert_lr {} --adding_adapter_to {} --fine_tune_to {}\
-                                                 --pretrained_model_dir {} --pretrained_model_name {} --finetune_layernorm {} --is_serial {} --adapter_down_size {} --bert_adapter_down_size {} --arch {}".format(
+                                                 --pretrained_model_dir {} --pretrained_model_name {} --finetune_layernorm {} --is_serial {} --adapter_down_size {} --bert_adapter_down_size {} --arch {} --num_words_title {}".format(
                                             root_data_dir, dataset, behaviors, news,
                                             mode, item_tower, load_ckpt_name, label_screen, logging_num, testing_num,
                                             l2_weight, drop_rate, batch_size, lr, embedding_dim,
@@ -69,5 +70,5 @@ for adapter_sasrec_lr in adapter_sasrec_lr_list:
                                             adapter_sasrec_lr, adapter_bert_lr, adding_adapter_to
                                             , fine_tune_to, pretrained_model_dir, pretrained_model_name,
                                             finetune_layernorm, is_serial, adapter_down_size, bert_adapter_down_size,
-                                            arch)
+                                            arch, num_words_title)
                                         os.system(run_py)
